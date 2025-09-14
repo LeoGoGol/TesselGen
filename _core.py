@@ -5,9 +5,11 @@ import numpy as np
 from typing import Iterable
 from typing import Iterable, List, Tuple
 
+
 points = []
 ga = []
 optimized_solution = []
+
 
 def is_convex(polygon: Iterable) -> bool:
     polygon = np.array(polygon)
@@ -24,6 +26,7 @@ def is_convex(polygon: Iterable) -> bool:
             elif orientation != np.sign(cross):
                 return False
     return True
+
 
 class PolygonateGA:
 
@@ -156,13 +159,11 @@ class PointInputWindow:
         self.ga = None
 
     def draw_grid(self):
-
         for i in range(0, self.canvas_width, self.grid_spacing):
             self.canvas.create_line(i, 0, i, self.canvas_height, fill=self.grid_color, tag="grid")
         for i in range(0, self.canvas_height, self.grid_spacing):            self.canvas.create_line(0, i, self.canvas_width, i, fill=self.grid_color, tag="grid")
 
     def redraw_grid(self, event=None):
-
         self.canvas_width = event.width
         self.canvas_height = event.height
         self.canvas.delete("grid")
@@ -170,7 +171,6 @@ class PointInputWindow:
         self.redisplay_points()
 
     def redisplay_points(self):
-
         for x, y in self.points:
             self.canvas.create_oval(x - self.point_radius, y - self.point_radius,
                                      x + self.point_radius, y + self.point_radius,
@@ -180,11 +180,9 @@ class PointInputWindow:
         x = event.x
         y = event.y
         self.points.append((x, y))
-
         self.canvas.create_oval(x - self.point_radius, y - self.point_radius,
                                  x + self.point_radius, y + self.point_radius,
                                  fill="black", outline="black")
-
         self.update_coordinates_display()
 
     def update_coordinates_display(self):
@@ -192,7 +190,6 @@ class PointInputWindow:
         self.coordinates_text.insert(tk.END, "Coordinates:\n")
         for x, y in self.points:
             self.coordinates_text.insert(tk.END, f"({x}, {y})\n")
-
 
     def start_processing(self):
 
