@@ -1,10 +1,13 @@
-import numpy as np
-from scipy.spatial import Delaunay
-from typing import Iterable, List, Tuple, Dict
+import tkinter as tk
+from tkinter import Canvas
 import random
+import numpy as np
+from typing import Iterable
+from typing import Iterable, List, Tuple
 
 points = []
-
+ga = []
+optimized_solution = []
 
 def is_convex(polygon: Iterable) -> bool:
     polygon = np.array(polygon)
@@ -21,7 +24,6 @@ def is_convex(polygon: Iterable) -> bool:
             elif orientation != np.sign(cross):
                 return False
     return True
-
 
 class PolygonateGA:
 
@@ -116,22 +118,96 @@ class PolygonateGA:
                 offspring2 = self._mutate(self._crossover(parent2, parent1))
                 new_population.extend([offspring1, offspring2])
             self.population = new_population
-        # Ensure valid tessellation for the final generation
         fitness_scores = [self._fitness(tess) for tess in self.population]
         best_tessellation = self.population[np.argmin(fitness_scores)]
         return [list(set(poly)) for poly in best_tessellation if len(set(poly)) > 2]
 
+class PointInputWindow:
+    def __init__(self, master):
+        self.master = master
+        master.title("Point Input")
+
+        self.canvas_width = 400
+        self.canvas_height = 300
+        self.canvas = Canvas(master, width=self.canvas_width, height=self.canvas_height, bg="white")
+        self.canvas.pack()
+
+        self.points = []
+        self.point_radius = 3
+        self.grid_color = "lightgrey"
+        self.grid_spacing = 20
+
+        self.draw_grid()
+
+        self.canvas.bind("<Button-1>", self.add_point)
+        self.canvas.bind("<Configure>", self.redraw_grid)  # Redraw grid on resize
+
+        self.coordinates_label = tk.Label(master, text="Coordinates:")
+        self.coordinates_label.pack()
+
+        self.coordinates_text = tk.Text(master, height=5, width=40)
+        self.coordinates_text.pack()
+
+        self.process_button = tk.Button(master, text="Начать обработку", command=self.start_processing)
+        self.process_button.pack()
+
+        self.update_coordinates_display()
+
+        self.ga = None
+
+    def draw_grid(self):
+
+        for i in range(0, self.canvas_width, self.grid_spacing):
+            self.canvas.create_line(i, 0, i, self.canvas_height, fill=self.grid_color, tag="grid")
+        for i in range(0, self.canvas_height, self.grid_spacing):            self.canvas.create_line(0, i, self.canvas_width, i, fill=self.grid_color, tag="grid")  # i added to the end
+
+    def redraw_grid(self, event=None):
+
+        self.canvas_width = event.width
+        self.canvas_height = event.height
+        self.canvas.delete("grid")
+        self.draw_grid()
+        self.redisplay_points()
+
+    def redisplay_points(self):
+
+        for x, y in self.points:
+            self.canvas.create_oval(x - self.point_radius, y - self.point_radius,
+                                     x + self.point_radius, y + self.point_radius,
+                                     fill="black", outline="black")
+
+    def add_point(self, event):
+        x = event.x
+        y = event.y
+        self.points.append((x, y))
+
+        self.canvas.create_oval(x - self.point_radius, y - self.point_radius,
+                                 x + self.point_radius, y + self.point_radius,
+                                 fill="black", outline="black")
+
+        self.update_coordinates_display()
+
+    def update_coordinates_display(self):
+        self.coordinates_text.delete("1.0", tk.END)
+        self.coordinates_text.insert(tk.END, "Coordinates:\n")
+        for x, y in self.points:
+            self.coordinates_text.insert(tk.END, f"({x}, {y})\n")
+
+
+    def start_processing(self):
+
+        if not self.points:
+            self.coordinates_text.insert(tk.END, "Please add points first.\n")
+            return
+        self.ga = PolygonateGA(self.points)
+        optimized_solution = self.ga.optimize()
+
+        # The two lines below moved into this scope
+        self.coordinates_text.insert(tk.END, "\nOptimized Solution:\n")
+        self.coordinates_text.insert(tk.END, str(optimized_solution))
+
 
 if __name__ == "__main__":
-    num_points = int(input("Enter the number of points: "))
-    points = []
-    for i in range(num_points):
-        x, y = map(float, input(f"Enter the coordinates for point {i + 1} (format: x y): ").split())
-        points.append((x, y))
-
-    ga = PolygonateGA(points)
-    optimized_solution = ga.optimize()
-
-    print("Optimized Tessellation:")
-    for polygon in optimized_solution:
-        print([points[index] for index in polygon])
+    root = tk.Tk()
+    window = PointInputWindow(root)
+    root.mainloop()
