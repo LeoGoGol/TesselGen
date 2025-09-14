@@ -140,7 +140,7 @@ class PointInputWindow:
         self.draw_grid()
 
         self.canvas.bind("<Button-1>", self.add_point)
-        self.canvas.bind("<Configure>", self.redraw_grid)  # Redraw grid on resize
+        self.canvas.bind("<Configure>", self.redraw_grid) 
 
         self.coordinates_label = tk.Label(master, text="Coordinates:")
         self.coordinates_label.pack()
@@ -159,7 +159,7 @@ class PointInputWindow:
 
         for i in range(0, self.canvas_width, self.grid_spacing):
             self.canvas.create_line(i, 0, i, self.canvas_height, fill=self.grid_color, tag="grid")
-        for i in range(0, self.canvas_height, self.grid_spacing):            self.canvas.create_line(0, i, self.canvas_width, i, fill=self.grid_color, tag="grid")  # i added to the end
+        for i in range(0, self.canvas_height, self.grid_spacing):            self.canvas.create_line(0, i, self.canvas_width, i, fill=self.grid_color, tag="grid")
 
     def redraw_grid(self, event=None):
 
@@ -202,7 +202,6 @@ class PointInputWindow:
         self.ga = PolygonateGA(self.points)
         optimized_solution = self.ga.optimize()
 
-        # The two lines below moved into this scope
         self.coordinates_text.insert(tk.END, "\nOptimized Solution:\n")
         self.coordinates_text.insert(tk.END, str(optimized_solution))
 
